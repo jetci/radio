@@ -22,30 +22,30 @@ const WelcomeOverlay: React.FC<WelcomeOverlayProps> = ({
       <div className="max-w-lg mx-auto px-6 text-center animate-in zoom-in duration-500">
         {/* Icon */}
         <div
-          className="w-32 h-32 mx-auto mb-8 rounded-full flex items-center justify-center animate-pulse"
+          className="w-24 h-24 md:w-32 md:h-32 mx-auto mb-6 md:mb-8 rounded-full flex items-center justify-center animate-pulse"
           style={{
             backgroundColor: `${accentColor}20`,
-            boxShadow: `0 0 80px ${accentColor}60`
+            boxShadow: `0 0 40px ${accentColor}40`
           }}
         >
-          <Globe2 size={64} style={{ color: accentColor }} />
+          <Globe2 className="w-12 h-12 md:w-16 md:h-16" style={{ color: accentColor }} />
         </div>
 
         {/* Title */}
         <h1
-          className="text-5xl md:text-6xl font-black mb-6 tracking-tight whitespace-nowrap"
+          className="text-3xl sm:text-4xl md:text-6xl font-black mb-4 md:mb-6 tracking-tight"
           style={{ color: accentColor }}
         >
           TongThin - Radio
         </h1>
 
         {/* Subtitle */}
-        <p className={`text-2xl md:text-3xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+        <p className={`text-xl md:text-3xl font-bold mb-3 md:mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
           ฟังวิทยุจากทั่วทุกมุมโลก ฟรี !!
         </p>
 
         {/* Development Notice */}
-        <p className={`text-lg mb-12 ${theme === 'dark' ? 'text-white/60' : 'text-gray-600'}`}>
+        <p className={`text-sm md:text-lg mb-8 md:mb-12 ${theme === 'dark' ? 'text-white/60' : 'text-gray-600'}`}>
           (กำลังอยู่ในขั้นตอนพัฒนา)
         </p>
 
@@ -53,14 +53,14 @@ const WelcomeOverlay: React.FC<WelcomeOverlayProps> = ({
         <button
           data-testid="welcome-start-btn"
           onClick={onClose}
-          className="group px-12 py-5 rounded-full font-black text-xl transition-all transform hover:scale-110 active:scale-95 flex items-center gap-4 mx-auto shadow-2xl"
+          className="group px-8 py-4 md:px-12 md:py-5 rounded-full font-black text-lg md:text-xl transition-all transform hover:scale-105 active:scale-95 flex items-center gap-3 md:gap-4 mx-auto shadow-2xl"
           style={{
             backgroundColor: accentColor,
             color: theme === 'dark' ? '#000' : '#fff',
-            boxShadow: `0 20px 60px ${accentColor}60`
+            boxShadow: `0 15px 40px ${accentColor}50`
           }}
         >
-          <Play size={24} fill="currentColor" />
+          <Play size={20} className="md:w-6 md:h-6" fill="currentColor" />
           Get Started
         </button>
       </div>

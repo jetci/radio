@@ -153,7 +153,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
   const isError = errorType !== 'none';
 
   return (
-    <div className={`fixed bottom-[75px] left-0 w-full md:bottom-[100px] md:left-6 md:w-auto z-50 pointer-events-none flex flex-col items-center md:items-start gap-4 ${isSettingsOpen ? 'hidden' : 'flex'}`}>
+    <div className={`fixed bottom-[85px] left-0 w-full md:bottom-[100px] md:left-6 md:w-auto z-50 pointer-events-none flex flex-col items-center md:items-start gap-3 md:gap-4 ${isSettingsOpen ? 'hidden' : 'flex'}`}>
       {/* Hidden Audio Element */}
       <audio
         ref={audioRef}
@@ -162,12 +162,11 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
         onLoadStart={() => setLoading(true)}
         onPlaying={() => setLoading(false)}
         onWaiting={() => setLoading(true)}
-        crossOrigin="anonymous"
       />
 
       {/* RADIO GARDEN STYLE CARD - Compact */}
       <div className="w-[92%] md:w-[280px] pointer-events-auto" data-testid="audio-player-card">
-        <div className={`bg-black/80 backdrop-blur-2xl border rounded-2xl p-5 shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all group ${isError ? 'border-orange-500/50' : 'border-white/10 hover:border-white/20'}`}>
+        <div className={`bg-black/80 backdrop-blur-2xl border rounded-2xl p-3 md:p-5 shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all group ${isError ? 'border-orange-500/50' : 'border-white/10 hover:border-white/20'}`}>
 
           {/* TOP ROW: CONTROLS */}
           <div className="flex items-center justify-between mb-4">
@@ -176,11 +175,11 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
                 data-testid="audio-control-play"
                 onClick={onTogglePlay}
                 disabled={loading}
-                className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 transition-all hover:scale-105 active:scale-95 ${isError ? 'bg-orange-500 text-white' : isPlaying ? 'bg-white text-black' : 'bg-white text-black pl-1'}`}
+                className={`w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center shrink-0 transition-all hover:scale-105 active:scale-95 ${isError ? 'bg-orange-500 text-white' : isPlaying ? 'bg-white text-black' : 'bg-white text-black pl-1'}`}
                 aria-label={isPlaying ? 'Pause station' : 'Play station'}
                 title={isPlaying ? 'Pause' : 'Play'}
               >
-                {loading ? <Loader2 size={20} className="animate-spin" /> : isError ? <AlertTriangle size={20} /> : isPlaying ? <Pause size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" />}
+                {loading ? <Loader2 size={18} className="animate-spin md:w-5 md:h-5" /> : isError ? <AlertTriangle size={18} className="md:w-5 md:h-5" /> : isPlaying ? <Pause size={18} className="md:w-5 md:h-5" fill="currentColor" /> : <Play size={18} className="md:w-5 md:h-5" fill="currentColor" />}
               </button>
 
               {/* Visualizer (Mini) */}
@@ -224,13 +223,13 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
           </div>
 
           {/* BOTTOM ROW: INFO */}
-          <div className="space-y-1">
-            <div className="flex items-center gap-2 text-[10px] font-bold text-[#00ff41] uppercase tracking-wider">
-              <span className="truncate max-w-[180px]">{locationName}</span>
+          <div className="space-y-0.5 md:space-y-1">
+            <div className="flex items-center gap-2 text-[9px] md:text-[10px] font-bold text-[#00ff41] uppercase tracking-wider">
+              <span className="truncate max-w-[120px] md:max-w-[180px]">{locationName}</span>
               <div className="w-1 h-1 rounded-full bg-white/20"></div>
               <span>{station.bitrate || '128'} KBPS</span>
             </div>
-            <h2 data-testid="active-station-title" className="text-xl font-bold text-white leading-tight line-clamp-2" title={displayName}>
+            <h2 data-testid="active-station-title" className="text-base md:text-xl font-bold text-white leading-tight line-clamp-1 md:line-clamp-2" title={displayName}>
               {displayName}
             </h2>
 

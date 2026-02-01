@@ -1,12 +1,14 @@
 import React, { useEffect, useRef, useState, useMemo } from 'react';
 import Globe from 'react-globe.gl';
+import { Plus, Target } from 'lucide-react';
 import { Station } from '../types';
 import { spreadOverlappingPoints, getOverlapStats } from '../utils/spreadPoints';
 import { clusterStationsByCity, filterClustersByZoom, getClusterSize, spreadClusterStations, CityCluster } from '../utils/cityCluster';
+import { findNearestStation } from '../utils/findNearestStation';
 
 interface GlobeViewProps {
   stations: Station[];
-  onSelectStation: (station: Station) => void;
+  onSelectStation: (station: Station, shouldCenter?: boolean) => void;
   activeStation: Station | null;
   selectedStation?: Station | null; // สถานีที่เลือกจาก Settings/Browse
   userCountryCoords: { lat: number; lng: number } | null;
@@ -27,6 +29,7 @@ const GlobeView: React.FC<GlobeViewProps> = ({
 }) => {
   const globeEl = useRef<any>(null);
   const [dimensions, setDimensions] = useState({ width: window.innerWidth, height: window.innerHeight });
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [hoveredPoint, setHoveredPoint] = useState<any>(null);
   const [hasInitialFocus, setHasInitialFocus] = useState(false);
   const [currentAltitude, setCurrentAltitude] = useState(2.5);
@@ -34,11 +37,35 @@ const GlobeView: React.FC<GlobeViewProps> = ({
   const [isClickProcessing, setIsClickProcessing] = useState(false); // Prevent double-clicks
   const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Radio Garden Style Selection Refs
+  const selectionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const lastSelectedUuid = useRef<string | null>(null);
+  const lastManualSelectionTime = useRef<number>(0);
+
+  // Sync ref with activeStation (prevents getting stuck after manual clicks/searches)
   useEffect(() => {
-    const handleResize = () => setDimensions({ width: window.innerWidth, height: window.innerHeight });
+    if (!activeStation) {
+      lastSelectedUuid.current = null;
+      return;
+    }
+
+    // If this station change came from OUTSIDE (e.g. click, sidebar, or selectedStation focus)
+    // we want to lock out auto-tuning briefly to let the camera arrive/stabilize
+    if (activeStation.stationuuid !== lastSelectedUuid.current) {
+      lastManualSelectionTime.current = Date.now();
+      lastSelectedUuid.current = activeStation.stationuuid;
+    }
+  }, [activeStation]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setDimensions({ width: window.innerWidth, height: window.innerHeight });
+      setIsMobile(window.innerWidth < 768);
+    };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
 
   // Trust the parent component (App.tsx) to have filtered/mapped stations correctly.
   // We just ensure we don't crash on completely null coordinates.
@@ -92,18 +119,18 @@ const GlobeView: React.FC<GlobeViewProps> = ({
     if (useClustering && visibleClusters) {
       console.log(`🎯 Processing ${visibleClusters.length} clusters for display`);
       const data: any[] = [];
-      
+
       visibleClusters.forEach((cluster, clusterIndex) => {
         // Spread stations within each cluster to prevent overlap
         const spreadStations = spreadClusterStations(cluster);
-        
+
         if (clusterIndex === 0) {
           console.log(`📍 First cluster:`, cluster.name, `Stations:`, spreadStations.length);
           if (spreadStations.length > 0) {
             console.log(`   First station display coords:`, spreadStations[0].displayLat, spreadStations[0].displayLng);
           }
         }
-        
+
         spreadStations.forEach((station) => {
           const isSelected = activeStation?.stationuuid === station.stationuuid;
           const isHovered = hoveredPoint?.stationuuid === station.stationuuid;
@@ -112,20 +139,20 @@ const GlobeView: React.FC<GlobeViewProps> = ({
           // Most stations are tiny, popular ones are bigger
           const votes = station.votes || 0;
           const clickcount = station.clickcount || 0;
-          
+
           // Popularity score (votes + clicks)
           const popularity = votes + (clickcount / 100);
-          
+
           // Logarithmic scaling for natural size distribution
           const popularityScore = Math.log(popularity + 1);
           const maxPopularity = Math.log(10000); // Assume max ~10k votes
           const normalizedPopularity = Math.min(popularityScore / maxPopularity, 1);
-          
-          // Visible base size (Enhanced for first-time users - 50% larger)
-          const minSize = 0.03;  // ~3.3km (clearly visible when zoomed out)
-          const maxSize = 0.12;  // ~13km (popular stations stand out)
+
+          // Visible base size (Balanced for visibility)
+          const minSize = 0.25;  // Visible even at distance
+          const maxSize = 0.8;   // Popular stations stand out
           const baseSize = minSize + (normalizedPopularity * (maxSize - minSize));
-          
+
           // Selected/hovered states
           const size = isSelected ? 0.25 : (isHovered ? baseSize * 1.4 : baseSize); // เพิ่มขนาด active
 
@@ -146,7 +173,7 @@ const GlobeView: React.FC<GlobeViewProps> = ({
           });
         });
       });
-      
+
       console.log(`📊 Marker Data (Micro-Spreading): ${data.length} stations from ${visibleClusters.length} clusters`);
       if (data.length > 0) {
         console.log(`✅ Sample marker:`, {
@@ -170,16 +197,16 @@ const GlobeView: React.FC<GlobeViewProps> = ({
       const votes = sp.station.votes || 0;
       const clickcount = sp.station.clickcount || 0;
       const popularity = votes + (clickcount / 100);
-      
+
       const popularityScore = Math.log(popularity + 1);
       const maxPopularity = Math.log(10000);
       const normalizedPopularity = Math.min(popularityScore / maxPopularity, 1);
-      
+
       // Same size range as clustering mode (Enhanced for visibility)
       const minSize = 0.03;  // ~3.3km (clearly visible)
       const maxSize = 0.12;  // ~13km (popular stations)
       const baseSize = minSize + (normalizedPopularity * (maxSize - minSize));
-      
+
       const size = isSelected ? 0.25 : (isHovered ? baseSize * 1.4 : baseSize); // เพิ่มขนาด active
 
       let color;
@@ -212,17 +239,7 @@ const GlobeView: React.FC<GlobeViewProps> = ({
     } catch (e) { }
   }, [showStartOverlay, userCountryCoords, hasInitialFocus]);
 
-  useEffect(() => {
-    if (!globeEl.current || !activeStation?.geo_lat || !hasInitialFocus) return;
-    try {
-      const currentAlt = globeEl.current.pointOfView().altitude;
-      globeEl.current.pointOfView({
-        lat: activeStation.geo_lat,
-        lng: activeStation.geo_long,
-        altitude: Math.min(currentAlt, 1.2)
-      }, 1500);
-    } catch (e) { }
-  }, [activeStation, hasInitialFocus]);
+
 
   // หมุน Globe เมื่อเลือกสถานีจาก Settings/Browse
   useEffect(() => {
@@ -236,25 +253,59 @@ const GlobeView: React.FC<GlobeViewProps> = ({
     } catch (e) { }
   }, [selectedStation, hasInitialFocus]);
 
-  // Track zoom level for progressive disclosure
+  // Track zoom level for progressive disclosure & Center Selection (Radio Garden Style)
   const handleZoom = React.useCallback(() => {
     if (globeEl.current) {
       const pov = globeEl.current.pointOfView();
       setCurrentAltitude(pov.altitude || 2.5);
-      
+
       // ส่งพิกัดตรงกลางกลับไปยัง App.tsx (สำหรับ Center Selection Mode)
-      if (onGlobeRotate && pov.lat !== undefined && pov.lng !== undefined) {
-        onGlobeRotate({ lat: pov.lat, lng: pov.lng });
+      if (pov.lat !== undefined && pov.lng !== undefined) {
+        onGlobeRotate?.({ lat: pov.lat, lng: pov.lng });
+
+        // --- Radio Garden Style Selection Logic ---
+        try {
+          // Block auto-tuning while camera is animating to a new focus (Prevents infinite loops)
+          if (Date.now() - lastManualSelectionTime.current < 3000) {
+            return;
+          }
+
+          // 1. Calculate Search Radius based on Zoom (Adaptive Threshold)
+          const maxDistance = Math.max(3, 120 * Math.pow(pov.altitude || 1, 2));
+
+          // 2. Find Nearest Station to Center
+          const nearest = findNearestStation(validStations, pov.lat, pov.lng, maxDistance);
+
+          // 3. Debounced Selection (Balanced for stability)
+          if (nearest && nearest.stationuuid !== lastSelectedUuid.current) {
+            if (selectionTimeoutRef.current) clearTimeout(selectionTimeoutRef.current);
+
+            selectionTimeoutRef.current = setTimeout(() => {
+              const currentPov = globeEl.current.pointOfView();
+              const distCheck = findNearestStation([nearest], currentPov.lat, currentPov.lng, maxDistance * 1.5);
+
+              if (distCheck) {
+                console.log(`🎯 Center Locked: ${nearest.name}`);
+                onSelectStation(nearest, false);
+                lastSelectedUuid.current = nearest.stationuuid;
+              }
+            }, 1200);
+          } else if (!nearest && lastSelectedUuid.current !== null) {
+            lastSelectedUuid.current = null;
+          }
+        } catch (e) {
+          console.error("Auto-tune error:", e);
+        }
       }
     }
-  }, [onGlobeRotate]);
+  }, [onGlobeRotate, validStations, onSelectStation]);
 
   // Controls configuration + Zoom tracking
   useEffect(() => {
     if (!globeEl.current) return;
     const controls = globeEl.current.controls();
     controls.enableDamping = true;
-    controls.dampingFactor = 0.08;
+    controls.dampingFactor = 0.1; // Default stabilizing damping
     controls.rotateSpeed = 0.8;
     controls.zoomSpeed = 1.0;
     controls.autoRotate = false;
@@ -271,12 +322,12 @@ const GlobeView: React.FC<GlobeViewProps> = ({
     return [{
       lat: activeStation.geo_lat,
       lng: activeStation.geo_long,
-      maxR: 8,
-      propagationSpeed: 4,
-      repeatPeriod: 1000,
-      color: theme === 'dark' ? '#ffffff' : '#3b82f6'
+      maxR: isMobile ? 8 : 12, // เล็กลงเมื่อใช้มือถือ
+      propagationSpeed: isMobile ? 2 : 3, // ช้าลงหน่อยเพื่อให้ดูเนียนบนจอเล็ก
+      repeatPeriod: 800,
+      color: theme === 'dark' ? '#00ff41' : '#3b82f6'
     }];
-  }, [activeStation, theme]);
+  }, [activeStation, theme, isMobile]);
 
   return (
     <div className={`w-full h-full fixed inset-0 z-0 cursor-default transition-colors duration-500`} style={{ backgroundColor: bgColor }}>
@@ -285,6 +336,7 @@ const GlobeView: React.FC<GlobeViewProps> = ({
         width={dimensions.width}
         height={dimensions.height}
         backgroundColor={bgColor}
+        globeRadius={100}
         globeImageUrl={theme === 'dark' ? "//unpkg.com/three-globe/example/img/earth-night.jpg" : "//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"}
         bumpImageUrl="//unpkg.com/three-globe/example/img/earth-topology.png"
 
@@ -294,7 +346,7 @@ const GlobeView: React.FC<GlobeViewProps> = ({
         pointLng="lng"
         pointColor="color"
         pointRadius="size"
-        pointAltitude={0.001} // Minimal elevation for flat appearance (prevents z-fighting)
+        pointAltitude={0.01} // Slight elevation for better visibility
         pointsMerge={false}  // DISABLED: Merging breaks click interaction - each point needs individual geometry
 
         // Native WebGL Interaction (Raycasting) with debounce
@@ -304,27 +356,27 @@ const GlobeView: React.FC<GlobeViewProps> = ({
             console.log('⏳ Click ignored - processing previous click');
             return;
           }
-          
+
           console.log('🖱️ Point clicked:', point);
-          
+
           if (!point) {
             console.warn('No point data received');
             return;
           }
-          
+
           // Set processing state
           setIsClickProcessing(true);
-          
+
           // Clear any existing timeout
           if (clickTimeoutRef.current) {
             clearTimeout(clickTimeoutRef.current);
           }
-          
+
           // Reset processing state after 500ms
           clickTimeoutRef.current = setTimeout(() => {
             setIsClickProcessing(false);
           }, 500);
-          
+
           // New micro-spreading mode: direct station object
           if (point.station && point.stationuuid) {
             console.log('✅ Station clicked (micro-spread):', point.station.name);
@@ -360,6 +412,20 @@ const GlobeView: React.FC<GlobeViewProps> = ({
         atmosphereColor={atmosphereColor}
         atmosphereAltitude={0.15}
       />
+
+      {/* Radio Garden Style Crosshair */}
+      <div className="pointer-events-none fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 flex items-center justify-center">
+        {/* Outer Circle */}
+        <div className={`border-2 rounded-full opacity-20 transition-all duration-500 ${theme === 'dark' ? 'border-[#00ff41]' : 'border-blue-500'} ${isMobile ? 'w-32 h-32' : 'w-48 h-48'}`}></div>
+
+        {/* Inner Target */}
+        <div className="absolute opacity-60 text-white drop-shadow-[0_0_2px_rgba(0,0,0,1)]">
+          <Target size={isMobile ? 24 : 40} strokeWidth={1} />
+        </div>
+
+        {/* Center Point */}
+        <div className={`bg-red-500 rounded-full absolute shadow-[0_0_8px_rgba(239,68,68,0.8)] ${isMobile ? 'w-1 h-1' : 'w-1.5 h-1.5'}`}></div>
+      </div>
     </div>
   );
 };

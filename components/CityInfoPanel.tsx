@@ -67,7 +67,7 @@ const CityInfoPanel: React.FC<CityInfoPanelProps> = ({
         // ปิด Gemini API ชั่วคราว (ไม่มี backend)
         setIsLoadingFact(false);
         setCityFact('Discover the local culture through radio waves...');
-        
+
         // const fetchCityFact = async () => {
         //     setIsLoadingFact(true);
         //     try {
@@ -101,42 +101,41 @@ const CityInfoPanel: React.FC<CityInfoPanelProps> = ({
     const accentBg = theme === 'dark' ? 'bg-[#00ff41]/10' : 'bg-blue-50';
 
     // ตรวจสอบว่ามีพิกัดหรือไม่
-    const hasCoordinates = station.geo_lat && station.geo_long && 
-                          !(station.geo_lat === 0 && station.geo_long === 0);
+    const hasCoordinates = station.geo_lat && station.geo_long &&
+        !(station.geo_lat === 0 && station.geo_long === 0);
 
     return (
         <div
             className={`fixed z-40 backdrop-blur-xl shadow-2xl transition-all duration-500 ${bgColor}
-                /* Mobile: Top Bar (Radio Garden style) */
-                top-0 left-0 right-0 w-full rounded-b-3xl p-4 border-b
+                /* Mobile: Compact Floating Card */
+                top-4 left-4 w-auto max-w-[calc(63%-20px)] rounded-2xl p-2 md:p-3 border
                 /* Desktop: Top Left Card */
-                md:top-6 md:left-6 md:right-auto md:w-auto md:max-w-sm md:rounded-3xl md:p-5 md:border
+                md:top-6 md:left-6 md:max-w-sm md:rounded-3xl md:p-5
             `}
         >
             {/* Compact Header (Radio Garden Style) */}
-            <div className="flex items-center gap-3">
-                <div className={`p-2 rounded-full ${accentBg} flex-shrink-0`}>
-                    <MapPin size={18} className={accentColor} />
+            <div className="flex items-center gap-2 md:gap-3">
+                <div className={`p-1.5 md:p-2 rounded-full ${accentBg} flex-shrink-0`}>
+                    <MapPin className={`w-3.5 h-3.5 md:w-[18px] md:h-[18px] ${accentColor}`} />
                 </div>
                 <div className="flex-1 min-w-0">
-                    <div className="flex items-baseline gap-2">
-                        <h3 className={`text-base font-bold ${textPrimary} truncate`}>
+                    <div className="flex items-baseline gap-1.5 md:gap-2">
+                        <h3 className={`text-sm md:text-base font-bold ${textPrimary} truncate`}>
                             {cityName}
                         </h3>
-                        <span className={`text-xs ${textSecondary} font-mono whitespace-nowrap`}>
+                        <span className={`text-[10px] md:text-xs ${textSecondary} font-mono whitespace-nowrap`}>
                             {localTime}
                         </span>
                     </div>
                     <div className="flex items-center gap-2">
-                        <p className={`text-xs ${textSecondary}`}>
+                        <p className={`text-[10px] md:text-xs ${textSecondary} truncate`}>
                             {countryName}
                         </p>
                         {!hasCoordinates && (
-                            <span className={`text-[10px] px-2 py-0.5 rounded-full ${
-                                theme === 'dark' 
-                                    ? 'bg-orange-500/20 text-orange-400' 
-                                    : 'bg-orange-100 text-orange-600'
-                            }`}>
+                            <span className={`text-[10px] px-2 py-0.5 rounded-full ${theme === 'dark'
+                                ? 'bg-orange-500/20 text-orange-400'
+                                : 'bg-orange-100 text-orange-600'
+                                }`}>
                                 ไม่แสดงบน Globe
                             </span>
                         )}

@@ -13,13 +13,11 @@ import SettingsPanel, { UserSettings } from './components/SettingsPanel';
 import ConfirmDialog from './components/ConfirmDialog';
 import { GlobeSkeleton } from './components/LoadingSkeleton';
 import OnlineCounter from './components/OnlineCounter';
-import CenterSelectionMode from './components/CenterSelectionMode';
-import { Signal, MapPin, Play, Globe as GlobeIcon, Sun, Moon, Sparkles, Crosshair } from 'lucide-react';
+import { Signal, MapPin, Play, Globe as GlobeIcon, Sun, Moon, Sparkles } from 'lucide-react';
 import { useTheme } from './contexts/ThemeContext';
 import { useListeningHistory } from './hooks/useListeningHistory';
 import { clusterStationsByCity } from './utils/cityCluster';
 import { getCountryCoordinates } from './utils/countryCoordinates';
-import { findNearestStation } from './utils/findNearestStation';
 
 const App: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
@@ -51,9 +49,6 @@ const App: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [showCityInfo, setShowCityInfo] = useState(true); // Show city info panel by default
   const [isAiJourneyLoading, setIsAiJourneyLoading] = useState(false);
-  const [isCenterSelectionMode, setIsCenterSelectionMode] = useState(false); // Center selection mode for mobile
-  const [globeCenter, setGlobeCenter] = useState<{ lat: number; lng: number } | null>(null); // Current globe center
-  const [nearestCenterStation, setNearestCenterStation] = useState<Station | null>(null); // Station at center
 
   const [favorites, setFavorites] = useState<Station[]>(() => {
     const saved = localStorage.getItem('j-radio-favorites');
@@ -69,6 +64,10 @@ const App: React.FC = () => {
     // 1. STEP 1: Minimal Country Detection (Functional only, no visual tracking)
     try {
       const geoResponse = await fetch('https://ipapi.co/json/');
+      if (geoResponse.status === 429) {
+        console.warn("⚠️ IPAPI Rate limited (429). Using timezone fallback.");
+        throw new Error("429");
+      }
       if (geoResponse.ok) {
         const geoData = await geoResponse.json();
         detectedCC = geoData.country_code;
@@ -81,21 +80,22 @@ const App: React.FC = () => {
         throw new Error("IP Geo failed");
       }
     } catch (err) {
+      console.log("📍 Geo-Location fallback active...");
       const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      if (tz.includes('Bangkok')) {
+      if (tz.includes('Bangkok') || tz.includes('Asia/Ho_Chi_Minh')) {
         detectedCC = 'TH';
         setUserCountry('Thailand');
         setUserCountryLat(13.7563);
         setUserCountryLng(100.5018);
       } else {
-        const locale = navigator.language || 'en-TH';
-        detectedCC = locale.split('-')[1] || 'TH';
-        setUserCountry('Thailand'); // Default fallback
-        setUserCountryLat(13.7563);
-        setUserCountryLng(100.5018);
+        const locale = navigator.language || 'en-US';
+        detectedCC = locale.split('-')[1] || 'US';
+        setUserCountry(detectedCC === 'TH' ? 'Thailand' : 'Global');
+        setUserCountryLat(detectedCC === 'TH' ? 13.7563 : 20);
+        setUserCountryLng(detectedCC === 'TH' ? 100.5018 : 0);
       }
       setUserCountryCode(detectedCC);
-      setLoadingStatus(`Using default location...`);
+      setLoadingStatus(`System online. Area: ${detectedCC}`);
     }
 
     // 2. STEP 2: Content Fetching (All Stations - Equality for All)
@@ -122,10 +122,10 @@ const App: React.FC = () => {
       // as requested by user to ensure stability.
       setLoadingStatus('Processing station data...');
       console.log('🔄 Filtering stations with valid coordinates...');
-      
+
       // เก็บสถานีทั้งหมด (รวมที่ไม่มีพิกัด) สำหรับ Settings
       setAllStationsIncludingNoCoords(rawStations);
-      
+
       // กรองเฉพาะสถานีที่มีพิกัดจริง (ไม่ใช้พิกัดประเทศ)
       const processedStations = rawStations.filter(s => {
         // Strict check: Must have real coordinates
@@ -185,30 +185,30 @@ const App: React.FC = () => {
     // Show user's country stations first (Local Mode)
     if (userCountryCode && allStations.length > 0) {
       console.log(`🎯 Starting with local stations from ${userCountry} (${userCountryCode})`);
-      
+
       // Filter stations in user's country with geo coordinates
       const localStations = allStations.filter(
         s => s.countrycode?.toUpperCase() === userCountryCode.toUpperCase() &&
-             s.geo_lat && s.geo_long
+          s.geo_lat && s.geo_long
       );
-      
+
       console.log(`📍 Found ${localStations.length} local stations with coordinates`);
-      
+
       if (localStations.length > 0) {
         // Start with local mode (show local stations first)
         setStations(localStations);
         setIsLocalMode(true);
-        
+
         // Auto-play the most popular local station
-        const topLocalStation = localStations.reduce((prev, current) => 
+        const topLocalStation = localStations.reduce((prev, current) =>
           (current.votes || 0) > (prev.votes || 0) ? current : prev
         );
-        
+
         console.log(`🎵 Auto-playing top local station: ${topLocalStation.name}`);
         setTunedStation(topLocalStation);
         setIsPlaying(true);
         addToHistory(topLocalStation);
-        
+
         // After 3 seconds, load all stations in background (for exploration)
         setTimeout(() => {
           console.log(`🌍 Loading all stations for exploration...`);
@@ -249,41 +249,19 @@ const App: React.FC = () => {
     setStations(filtered);
   }, [userSettings, allStations]);
 
-  // Handle globe rotation - update center coordinates
-  const handleGlobeRotate = useCallback((coords: { lat: number; lng: number }) => {
-    if (isCenterSelectionMode) {
-      setGlobeCenter(coords);
-    }
-  }, [isCenterSelectionMode]);
 
-  // Find nearest station to globe center when in Center Selection Mode
-  useEffect(() => {
-    if (!isCenterSelectionMode || !globeCenter || stations.length === 0) {
-      setNearestCenterStation(null);
-      return;
-    }
-
-    const nearest = findNearestStation(
-      stations,
-      globeCenter.lat,
-      globeCenter.lng,
-      500 // 500km radius
-    );
-
-    setNearestCenterStation(nearest);
-  }, [isCenterSelectionMode, globeCenter, stations]);
-
-  const handleSelectStation = (station: Station) => {
+  const handleSelectStation = (station: Station, shouldCenter: boolean = true) => {
     setTunedStation(station);
     setIsPlaying(true);
     addToHistory(station);
     setShowCityInfo(true);
-    
+
     // ตรวจสอบว่ามีพิกัดหรือไม่
-    if (station.geo_lat && station.geo_long && !(station.geo_lat === 0 && station.geo_long === 0)) {
+    if (shouldCenter && station.geo_lat && station.geo_long && !(station.geo_lat === 0 && station.geo_long === 0)) {
       setSelectedStationForGlobe(station); // หมุน Globe ไปยังสถานี
     } else {
-      console.log('ℹ️ สถานีนี้ไม่มีพิกัดบน Globe:', station.name);
+      // Clear selected station if we aren't centering, so we don't trigger the manual jump effect
+      setSelectedStationForGlobe(null);
     }
   };
 
@@ -365,7 +343,7 @@ const App: React.FC = () => {
     <div className={`w-screen h-screen ${bgColor} ${textColor} relative overflow-hidden font-sans transition-colors duration-500`}>
       {/* Show loading skeleton while loading stations */}
       {isLoading && <GlobeSkeleton />}
-      
+
       {/* Show globe when loaded */}
       {!isLoading && (
         <GlobeView
@@ -376,7 +354,6 @@ const App: React.FC = () => {
           userCountryCoords={userCountryLat && userCountryLng ? { lat: userCountryLat, lng: userCountryLng } : null}
           showStartOverlay={showStartOverlay}
           theme={theme}
-          onGlobeRotate={handleGlobeRotate}
         />
       )}
 
@@ -484,64 +461,39 @@ const App: React.FC = () => {
         <button onClick={handleAiJourney}>AI Journey</button>
       </div> */}
 
-      {/* ONLINE COUNTER, CENTER MODE, THEME TOGGLE & LOCAL/GLOBAL BUTTONS (Top Right - Compact) */}
-      <div className="fixed top-4 md:top-6 right-4 md:right-6 z-50 flex items-center gap-2">
+      {/* ONLINE COUNTER, THEME TOGGLE & LOCAL/GLOBAL BUTTONS (Top Right - Vertical on Mobile) */}
+      <div className="fixed top-4 right-4 md:top-6 md:right-6 z-50 flex flex-col md:flex-row items-end md:items-center gap-2 md:gap-2">
         {/* Online Counter */}
         {!settingsPanelOpen && <OnlineCounter />}
-        
-        {/* Center Selection Mode Toggle */}
-        {!settingsPanelOpen && (
-          <button
-            onClick={() => setIsCenterSelectionMode(!isCenterSelectionMode)}
-            className={`group backdrop-blur-xl border rounded-full p-2 transition-all ${
-              isCenterSelectionMode
-                ? theme === 'dark'
-                  ? 'bg-[#00ff41]/20 border-[#00ff41]/50'
-                  : 'bg-blue-100 border-blue-500/50'
-                : theme === 'dark'
-                ? 'bg-black/80 border-white/10 hover:border-[#00ff41]/50'
-                : 'bg-white/80 border-gray-200 hover:border-blue-500/50'
-            }`}
-            title={isCenterSelectionMode ? 'Click Mode' : 'Center Selection Mode (for mobile)'}
-          >
-            <Crosshair 
-              size={16} 
-              className={isCenterSelectionMode 
-                ? theme === 'dark' ? 'text-[#00ff41]' : 'text-blue-600'
-                : theme === 'dark' ? 'text-white/60' : 'text-gray-600'
-              } 
-            />
-          </button>
-        )}
-        
+
         {/* Theme Toggle */}
         <button
           onClick={toggleTheme}
-          className={`group backdrop-blur-xl border rounded-full p-2 transition-all ${theme === 'dark'
+          className={`group backdrop-blur-xl border rounded-full p-1.5 md:p-2 transition-all ${theme === 'dark'
             ? 'bg-black/80 border-white/10 hover:border-yellow-500/50'
             : 'bg-white/80 border-gray-200 hover:border-purple-500/50'
             }`}
         >
           {theme === 'dark' ? (
-            <Sun size={16} className="text-yellow-500" />
+            <Sun size={14} className="text-yellow-500 md:w-4 md:h-4" />
           ) : (
-            <Moon size={16} className="text-purple-600" />
+            <Moon size={14} className="text-purple-600 md:w-4 md:h-4" />
           )}
         </button>
 
         {/* Local/Global Toggle */}
         <button
           onClick={toggleLocalGlobal}
-          className={`group backdrop-blur-xl border rounded-full px-3 py-1.5 flex items-center gap-1.5 transition-all ${theme === 'dark'
+          className={`group backdrop-blur-xl border rounded-full px-2 py-1 md:px-3 md:py-1.5 flex items-center gap-1 md:gap-1.5 transition-all ${theme === 'dark'
             ? 'bg-black/80 border-white/10 hover:border-[#00ff41]/50'
             : 'bg-white/80 border-gray-200 hover:border-blue-500/50'
             }`}
         >
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 md:gap-2">
             {isLocalMode ? (
               <>
-                <MapPin size={14} className={`${theme === 'dark' ? 'text-[#00ff41]' : 'text-blue-600'} md:w-4 md:h-4`} />
-                <span className={`text-[10px] md:text-xs font-bold uppercase tracking-wider ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                <MapPin size={12} className={`${theme === 'dark' ? 'text-[#00ff41]' : 'text-blue-600'} md:w-4 md:h-4`} />
+                <span className={`text-[9px] md:text-xs font-bold uppercase tracking-wider ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                   {/* Truncate long country names on mobile */}
                   <span className="md:hidden">{(userCountry || 'Local').substring(0, 3)}</span>
                   <span className="hidden md:inline">{userCountry || 'Local'}</span>
@@ -549,32 +501,20 @@ const App: React.FC = () => {
               </>
             ) : (
               <>
-                <GlobeIcon size={14} className={`${theme === 'dark' ? 'text-white' : 'text-gray-700'} md:w-4 md:h-4`} />
-                <span className={`text-[10px] md:text-xs font-bold uppercase tracking-wider ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                <GlobeIcon size={12} className={`${theme === 'dark' ? 'text-white' : 'text-gray-700'} md:w-4 md:h-4`} />
+                <span className={`text-[9px] md:text-xs font-bold uppercase tracking-wider ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                   Global
                 </span>
               </>
             )}
           </div>
-          <div className={`w-px h-3 md:h-4 ${theme === 'dark' ? 'bg-white/20' : 'bg-gray-300'}`}></div>
+          <div className={`w-px h-2.5 md:h-4 ${theme === 'dark' ? 'bg-white/20' : 'bg-gray-300'}`}></div>
           <span className={`text-[8px] md:text-[10px] uppercase tracking-widest font-mono ${theme === 'dark' ? 'text-white/40' : 'text-gray-500'}`}>
             {stations.length} <span className="hidden md:inline">stations</span>
           </span>
         </button>
       </div>
 
-      {/* CENTER SELECTION MODE */}
-      <CenterSelectionMode
-        isActive={isCenterSelectionMode}
-        nearestStation={nearestCenterStation}
-        onSelect={() => {
-          if (nearestCenterStation) {
-            handleSelectStation(nearestCenterStation);
-            setIsCenterSelectionMode(false); // Exit center mode after selection
-          }
-        }}
-        theme={theme}
-      />
 
       {/* WELCOME OVERLAY WITH TUTORIAL */}
       {showStartOverlay && !isLoading && (
