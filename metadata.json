@@ -1,0 +1,7 @@
+{
+  "name": "J Radio",
+  "description": "An interactive 3D globe application to explore and listen to thousands of live radio stations worldwide using the Radio Browser API and Gemini AI recommendations.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}

@@ -1,0 +1,130 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "retry": "Retry",
+    "close": "Close",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "search": "Search",
+    "all": "All"
+  },
+  "navigation": {
+    "explore": "Explore",
+    "favorites": "Favorites",
+    "browse": "Browse",
+    "search": "Search",
+    "settings": "Settings"
+  },
+  "welcome": {
+    "title": "Welcome to J-Radio",
+    "subtitle": "Explore radio stations from around the world",
+    "description": "Spin the globe to discover radio stations, or use the menu below to search",
+    "startButton": "Start Exploring",
+    "features": {
+      "explore": "Explore radio stations worldwide",
+      "favorites": "Save your favorite stations",
+      "search": "Search by country and genre"
+    }
+  },
+  "player": {
+    "play": "Play",
+    "pause": "Pause",
+    "stop": "Stop",
+    "volume": "Volume",
+    "mute": "Mute",
+    "unmute": "Unmute",
+    "nowPlaying": "Now Playing",
+    "loading": "Loading...",
+    "error": "Cannot play this station",
+    "explore": "Explore",
+    "addToFavorites": "Add to Favorites",
+    "removeFromFavorites": "Remove from Favorites",
+    "hide": "Hide Station",
+    "share": "Share"
+  },
+  "search": {
+    "placeholder": "Search stations...",
+    "noResults": "No stations found",
+    "results": "Search Results",
+    "allCountries": "All Countries",
+    "allGenres": "All Genres",
+    "country": "Country",
+    "genre": "Genre"
+  },
+  "favorites": {
+    "title": "Favorites",
+    "empty": "No favorites yet",
+    "emptyDescription": "Click the heart icon to add stations to your favorites",
+    "added": "Added to favorites",
+    "removed": "Removed from favorites"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "theme": "Theme",
+    "themeDark": "Dark",
+    "themeLight": "Light",
+    "maxStations": "Maximum Stations",
+    "hiddenStations": "Hidden Stations",
+    "noHiddenStations": "No hidden stations",
+    "unhide": "Unhide",
+    "tabs": {
+      "general": "General",
+      "stations": "Stations",
+      "hidden": "Hidden",
+      "noCoords": "No Coordinates",
+      "about": "About"
+    },
+    "stationsWithCoords": "Stations with coordinates",
+    "stationsWithoutCoords": "Stations without coordinates",
+    "totalStations": "Total stations"
+  },
+  "station": {
+    "country": "Country",
+    "language": "Language",
+    "tags": "Tags",
+    "bitrate": "Bitrate",
+    "codec": "Codec",
+    "homepage": "Homepage",
+    "votes": "Votes",
+    "clickCount": "Click Count",
+    "noCoordinates": "Not shown on Globe",
+    "usedCountryCoords": "Using country coordinates",
+    "playStation": "Play Station",
+    "focusOnGlobe": "Focus on Globe"
+  },
+  "confirmDialog": {
+    "hideStation": {
+      "title": "Hide Station?",
+      "message": "Do you want to hide this station? You can unhide it later in Settings.",
+      "confirm": "Hide",
+      "cancel": "Cancel"
+    }
+  },
+  "toast": {
+    "stationHidden": "Station hidden",
+    "stationUnhidden": "Station unhidden",
+    "settingsSaved": "Settings saved",
+    "copiedToClipboard": "Link copied to clipboard",
+    "errorPlayingStation": "Cannot play this station"
+  },
+  "cityInfo": {
+    "stations": "stations",
+    "inCity": "in",
+    "playRandom": "Play Random",
+    "viewAll": "View All"
+  },
+  "globe": {
+    "loading": "Loading globe...",
+    "clickStation": "Click on a point to play a station",
+    "rotateToExplore": "Rotate the globe to explore"
+  },
+  "errors": {
+    "failedToLoad": "Failed to load data",
+    "noInternet": "No internet connection",
+    "tryAgain": "Please try again"
+  }
+}

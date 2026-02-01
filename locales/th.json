@@ -1,0 +1,130 @@
+{
+  "common": {
+    "loading": "กำลังโหลด...",
+    "error": "เกิดข้อผิดพลาด",
+    "retry": "ลองใหม่",
+    "close": "ปิด",
+    "save": "บันทึก",
+    "cancel": "ยกเลิก",
+    "delete": "ลบ",
+    "confirm": "ยืนยัน",
+    "search": "ค้นหา",
+    "all": "ทั้งหมด"
+  },
+  "navigation": {
+    "explore": "สำรวจ",
+    "favorites": "รายการโปรด",
+    "browse": "รายการวิทยุ",
+    "search": "ค้นหา",
+    "settings": "ตั้งค่า"
+  },
+  "welcome": {
+    "title": "ยินดีต้อนรับสู่ J-Radio",
+    "subtitle": "สำรวจสถานีวิทยุจากทั่วโลก",
+    "description": "หมุนลูกโลกเพื่อค้นหาสถานีวิทยุ หรือใช้เมนูด้านล่างเพื่อค้นหา",
+    "startButton": "เริ่มสำรวจ",
+    "features": {
+      "explore": "สำรวจสถานีวิทยุจากทั่วโลก",
+      "favorites": "บันทึกสถานีโปรดของคุณ",
+      "search": "ค้นหาตามประเทศและประเภทเพลง"
+    }
+  },
+  "player": {
+    "play": "เล่น",
+    "pause": "หยุด",
+    "stop": "หยุด",
+    "volume": "ระดับเสียง",
+    "mute": "ปิดเสียง",
+    "unmute": "เปิดเสียง",
+    "nowPlaying": "กำลังเล่น",
+    "loading": "กำลังโหลด...",
+    "error": "ไม่สามารถเล่นสถานีนี้ได้",
+    "explore": "สำรวจ",
+    "addToFavorites": "เพิ่มในรายการโปรด",
+    "removeFromFavorites": "ลบออกจากรายการโปรด",
+    "hide": "ซ่อนสถานี",
+    "share": "แชร์"
+  },
+  "search": {
+    "placeholder": "ค้นหาสถานี...",
+    "noResults": "ไม่พบสถานี",
+    "results": "ผลการค้นหา",
+    "allCountries": "ทุกประเทศ",
+    "allGenres": "ทุกประเภท",
+    "country": "ประเทศ",
+    "genre": "ประเภทเพลง"
+  },
+  "favorites": {
+    "title": "รายการโปรด",
+    "empty": "ยังไม่มีรายการโปรด",
+    "emptyDescription": "คลิกไอคอนหัวใจเพื่อเพิ่มสถานีในรายการโปรด",
+    "added": "เพิ่มในรายการโปรดแล้ว",
+    "removed": "ลบออกจากรายการโปรดแล้ว"
+  },
+  "settings": {
+    "title": "ตั้งค่า",
+    "language": "ภาษา",
+    "theme": "ธีม",
+    "themeDark": "มืด",
+    "themeLight": "สว่าง",
+    "maxStations": "จำนวนสถานีสูงสุด",
+    "hiddenStations": "สถานีที่ซ่อน",
+    "noHiddenStations": "ไม่มีสถานีที่ซ่อน",
+    "unhide": "แสดงสถานี",
+    "tabs": {
+      "general": "ทั่วไป",
+      "stations": "สถานี",
+      "hidden": "ซ่อนไว้",
+      "noCoords": "ไม่มีพิกัด",
+      "about": "เกี่ยวกับ"
+    },
+    "stationsWithCoords": "สถานีที่มีพิกัด",
+    "stationsWithoutCoords": "สถานีที่ไม่มีพิกัด",
+    "totalStations": "สถานีทั้งหมด"
+  },
+  "station": {
+    "country": "ประเทศ",
+    "language": "ภาษา",
+    "tags": "ประเภท",
+    "bitrate": "Bitrate",
+    "codec": "Codec",
+    "homepage": "เว็บไซต์",
+    "votes": "โหวต",
+    "clickCount": "จำนวนคลิก",
+    "noCoordinates": "ไม่แสดงบน Globe",
+    "usedCountryCoords": "ใช้พิกัดประเทศ",
+    "playStation": "เล่นสถานี",
+    "focusOnGlobe": "มุ่งไปที่ Globe"
+  },
+  "confirmDialog": {
+    "hideStation": {
+      "title": "ซ่อนสถานี?",
+      "message": "คุณต้องการซ่อนสถานีนี้หรือไม่? คุณสามารถแสดงสถานีอีกครั้งได้ในการตั้งค่า",
+      "confirm": "ซ่อน",
+      "cancel": "ยกเลิก"
+    }
+  },
+  "toast": {
+    "stationHidden": "ซ่อนสถานีแล้ว",
+    "stationUnhidden": "แสดงสถานีแล้ว",
+    "settingsSaved": "บันทึกการตั้งค่าแล้ว",
+    "copiedToClipboard": "คัดลอกลิงก์แล้ว",
+    "errorPlayingStation": "ไม่สามารถเล่นสถานีนี้ได้"
+  },
+  "cityInfo": {
+    "stations": "สถานี",
+    "inCity": "ใน",
+    "playRandom": "เล่นแบบสุ่ม",
+    "viewAll": "ดูทั้งหมด"
+  },
+  "globe": {
+    "loading": "กำลังโหลดลูกโลก...",
+    "clickStation": "คลิกที่จุดเพื่อเล่นสถานี",
+    "rotateToExplore": "หมุนลูกโลกเพื่อสำรวจ"
+  },
+  "errors": {
+    "failedToLoad": "ไม่สามารถโหลดข้อมูลได้",
+    "noInternet": "ไม่มีการเชื่อมต่ออินเทอร์เน็ต",
+    "tryAgain": "กรุณาลองใหม่อีกครั้ง"
+  }
+}
