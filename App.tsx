@@ -29,7 +29,7 @@ const App: React.FC = () => {
   const [tunedStation, setTunedStation] = useState<Station | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [showStartOverlay, setShowStartOverlay] = useState(false);
+  const [showStartOverlay, setShowStartOverlay] = useState(true);
   const [loadingStatus, setLoadingStatus] = useState('Detecting Local Sector...');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [settingsPanelOpen, setSettingsPanelOpen] = useState(false);
@@ -49,6 +49,7 @@ const App: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [showCityInfo, setShowCityInfo] = useState(true); // Show city info panel by default
   const [isAiJourneyLoading, setIsAiJourneyLoading] = useState(false);
+  const isDeepLinkedRef = useRef(false);
 
   const [favorites, setFavorites] = useState<Station[]>(() => {
     const saved = localStorage.getItem('j-radio-favorites');
@@ -167,11 +168,8 @@ const App: React.FC = () => {
       setLoadingStatus('Error loading stations. Please refresh.');
       // Still proceed to show UI even if there's an error
     } finally {
-      setTimeout(() => {
-        console.log('🎉 Loading complete, showing start overlay');
-        setIsLoading(false);
-        setShowStartOverlay(true);
-      }, 800);
+      // Just mark loading as false, the Start Overlay is already visible
+      setIsLoading(false);
     }
   }, []);
 
@@ -179,8 +177,34 @@ const App: React.FC = () => {
     initializeApp();
   }, [initializeApp]);
 
+  // Handle deep-linked station from URL
+  useEffect(() => {
+    if (allStations.length > 0) {
+      const params = new URLSearchParams(window.location.search);
+      const stationId = params.get('station');
+      if (stationId) {
+        const station = allStations.find(s => s.stationuuid === stationId);
+        if (station) {
+          console.log(`🎯 Auto-tuning to shared station: ${station.name}`);
+          isDeepLinkedRef.current = true;
+          handleSelectStation(station, true, false);
+          // Clean up URL without reload
+          window.history.replaceState({}, '', window.location.pathname);
+        }
+      }
+    }
+  }, [allStations]);
+
   const handleStart = () => {
     setShowStartOverlay(false);
+
+    // If we tuned from a deep link, don't overwrite with local stations
+    if (isDeepLinkedRef.current && tunedStation) {
+      console.log("🚀 Deep link detected, starting playback...");
+      // Re-trigger the selection to ensure everything is synced
+      handleSelectStation(tunedStation, true, true);
+      return;
+    }
 
     // Show user's country stations first (Local Mode)
     if (userCountryCode && allStations.length > 0) {
@@ -250,9 +274,11 @@ const App: React.FC = () => {
   }, [userSettings, allStations]);
 
 
-  const handleSelectStation = (station: Station, shouldCenter: boolean = true) => {
+  const handleSelectStation = (station: Station, shouldCenter: boolean = true, autoPlay: boolean = true) => {
     setTunedStation(station);
-    setIsPlaying(true);
+    if (autoPlay) {
+      setIsPlaying(true);
+    }
     addToHistory(station);
     setShowCityInfo(true);
 
@@ -516,8 +542,8 @@ const App: React.FC = () => {
       </div>
 
 
-      {/* WELCOME OVERLAY WITH TUTORIAL */}
-      {showStartOverlay && !isLoading && (
+      {/* WELCOME OVERLAY WITH TUTORIAL & LOADING */}
+      {showStartOverlay && (
         <WelcomeOverlay
           onClose={handleStart}
           onAutoTune={handleAiJourney}
@@ -526,6 +552,8 @@ const App: React.FC = () => {
             handleStart();
           }}
           theme={theme}
+          isAppLoading={isLoading}
+          loadingStatus={loadingStatus}
         />
       )}
 

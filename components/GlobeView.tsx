@@ -229,6 +229,11 @@ const GlobeView: React.FC<GlobeViewProps> = ({
   // Focus Logic
   useEffect(() => {
     if (!globeEl.current || !userCountryCoords || showStartOverlay || hasInitialFocus) return;
+    // Don't auto-focus on country if we already have a selected station from deep link
+    if (selectedStation) {
+      setHasInitialFocus(true);
+      return;
+    }
     try {
       globeEl.current.pointOfView({
         lat: userCountryCoords.lat,
@@ -241,17 +246,22 @@ const GlobeView: React.FC<GlobeViewProps> = ({
 
 
 
-  // หมุน Globe เมื่อเลือกสถานีจาก Settings/Browse
+  // หมุน Globe เมื่อเลือกสถานีจาก Settings/Browse หรือ Deep Link
   useEffect(() => {
-    if (!globeEl.current || !selectedStation?.geo_lat || !hasInitialFocus) return;
+    if (!globeEl.current || !selectedStation?.geo_lat) return;
+    // We allow selectedStation to move the camera even if hasInitialFocus is false (e.g. on start)
     try {
+      console.log(`🌍 Focusing on selected station: ${selectedStation.name}`);
       globeEl.current.pointOfView({
         lat: selectedStation.geo_lat,
         lng: selectedStation.geo_long,
         altitude: 1.5 // ซูมเข้าไปหน่อย
       }, 2000); // animation 2 วินาที
+
+      // If we move to a selected station, we consider the initial focus "done"
+      if (!hasInitialFocus) setHasInitialFocus(true);
     } catch (e) { }
-  }, [selectedStation, hasInitialFocus]);
+  }, [selectedStation]); // Removed hasInitialFocus from deps to ensure it runs immediately
 
   // Track zoom level for progressive disclosure & Center Selection (Radio Garden Style)
   const handleZoom = React.useCallback(() => {

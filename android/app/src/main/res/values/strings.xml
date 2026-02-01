@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">TongThin Radio</string>
+    <string name="title_activity_main">TongThin Radio</string>
+    <string name="package_name">com.tongthin.radio</string>
+    <string name="custom_url_scheme">com.tongthin.radio</string>
+</resources>

@@ -197,7 +197,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
               {onHideStation && (
                 <button
                   onClick={onHideStation}
-                  className="p-2 rounded-full transition-all text-white/20 hover:text-orange-500 hover:bg-orange-500/10"
+                  className="p-2 rounded-full transition-all text-white/80 hover:opacity-50 active:opacity-30"
                   aria-label="Hide this station"
                   title="ซ่อนสถานีนี้">
                   <EyeOff size={18} />
@@ -207,14 +207,14 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
               <button
                 data-testid="audio-control-favorite"
                 onClick={onToggleFavorite}
-                className={`p-2 rounded-full transition-all ${isFavorite ? 'text-red-500 bg-red-500/10' : 'text-white/20 hover:text-white hover:bg-white/10'}`}
+                className={`p-2 rounded-full transition-all active:opacity-30 ${isFavorite ? 'text-red-500 bg-red-500/10' : 'text-white/80 hover:opacity-50'}`}
                 aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
                 title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}>
                 <Heart size={18} fill={isFavorite ? "currentColor" : "none"} />
               </button>
               <button
                 onClick={handleShare}
-                className={`p-2 rounded-full transition-all ${shareSuccess ? 'text-green-500' : 'text-white/20 hover:text-white hover:bg-white/10'}`}
+                className={`p-2 rounded-full transition-all active:opacity-30 ${shareSuccess ? 'text-green-500' : 'text-white/80 hover:opacity-50'}`}
                 aria-label="Share station"
                 title="Share station">
                 {shareSuccess ? <Check size={18} /> : <Share2 size={18} />}
