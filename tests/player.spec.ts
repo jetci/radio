@@ -18,6 +18,13 @@ test.describe('J Radio - Audio Player Tests', () => {
             await route.fulfill({ json: { country_code: 'TH', country_name: 'Thailand', latitude: 13.75, longitude: 100.50 } });
         });
 
+        // Mock Audio
+        await page.addInitScript(() => {
+            window.HTMLMediaElement.prototype.play = async () => { };
+            window.HTMLMediaElement.prototype.pause = () => { };
+            window.HTMLMediaElement.prototype.load = () => { };
+        });
+
         await page.goto('http://localhost:5173');
 
         const startBtn = page.getByTestId('welcome-start-btn');

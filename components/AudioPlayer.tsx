@@ -153,7 +153,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
   const isError = errorType !== 'none';
 
   return (
-    <div className={`fixed bottom-[100px] left-6 z-50 pointer-events-none flex flex-col items-start gap-4 ${isSettingsOpen ? 'hidden' : 'flex'}`}>
+    <div className={`fixed bottom-[75px] left-0 w-full md:bottom-[100px] md:left-6 md:w-auto z-50 pointer-events-none flex flex-col items-center md:items-start gap-4 ${isSettingsOpen ? 'hidden' : 'flex'}`}>
       {/* Hidden Audio Element */}
       <audio
         ref={audioRef}
@@ -166,7 +166,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
       />
 
       {/* RADIO GARDEN STYLE CARD - Compact */}
-      <div className="w-[280px] pointer-events-auto" data-testid="audio-player-card">
+      <div className="w-[92%] md:w-[280px] pointer-events-auto" data-testid="audio-player-card">
         <div className={`bg-black/80 backdrop-blur-2xl border rounded-2xl p-5 shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all group ${isError ? 'border-orange-500/50' : 'border-white/10 hover:border-white/20'}`}>
 
           {/* TOP ROW: CONTROLS */}

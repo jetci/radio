@@ -165,15 +165,15 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
         onPlay={() => setIsPreviewPlaying(true)}
       />
 
-      <div className={`w-full max-w-2xl max-h-[80vh] m-4 rounded-2xl border shadow-2xl ${bgColor} overflow-hidden flex flex-col`}>
+      <div className={`w-full h-full md:h-auto md:max-w-2xl md:max-h-[80vh] md:m-4 md:rounded-2xl border-0 md:border shadow-none md:shadow-2xl ${bgColor} overflow-hidden flex flex-col`}>
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-white/10">
-          <h2 className={`text-2xl font-bold ${textPrimary}`}>{t('settings.title')}</h2>
+        <div className="flex items-center justify-between p-4 md:p-6 border-b border-white/10">
+          <h2 className={`text-xl md:text-2xl font-bold ${textPrimary}`}>{t('settings.title')}</h2>
           <button
             onClick={onClose}
             className={`p-2 rounded-lg transition-colors ${theme === 'dark'
-                ? 'hover:bg-white/10 text-white/60 hover:text-white'
-                : 'hover:bg-gray-100 text-gray-500 hover:text-gray-800'
+              ? 'hover:bg-white/10 text-white/60 hover:text-white'
+              : 'hover:bg-gray-100 text-gray-500 hover:text-gray-800'
               }`}
             aria-label="Close settings"
             title="Close"
@@ -183,7 +183,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+        <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6">
           {/* Language Selector */}
           <div>
             <h3 className={`text-lg font-bold ${textPrimary} mb-3 flex items-center gap-2`}>
@@ -195,8 +195,8 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
               value={language}
               onChange={(e) => setLanguage(e.target.value as 'th' | 'en')}
               className={`w-full px-4 py-3 rounded-lg border text-base ${theme === 'dark'
-                  ? 'bg-white/5 border-white/10 text-white'
-                  : 'bg-white border-gray-200 text-gray-900'
+                ? 'bg-white/5 border-white/10 text-white'
+                : 'bg-white border-gray-200 text-gray-900'
                 } focus:outline-none focus:ring-2 focus:ring-[#00ff41]/50`}
               style={theme === 'light' ? { color: '#111827' } : undefined}
               aria-label="Select language"
@@ -240,12 +240,12 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
               <button
                 onClick={() => setActiveTab('with-coords')}
                 className={`flex-1 px-3 py-2 rounded-lg text-sm font-semibold transition-all ${activeTab === 'with-coords'
-                    ? theme === 'dark'
-                      ? 'bg-[#00ff41] text-black'
-                      : 'bg-blue-600 text-white'
-                    : theme === 'dark'
-                      ? 'bg-white/5 hover:bg-white/10 text-white/60'
-                      : 'bg-gray-100 hover:bg-gray-200 text-gray-600'
+                  ? theme === 'dark'
+                    ? 'bg-[#00ff41] text-black'
+                    : 'bg-blue-600 text-white'
+                  : theme === 'dark'
+                    ? 'bg-white/5 hover:bg-white/10 text-white/60'
+                    : 'bg-gray-100 hover:bg-gray-200 text-gray-600'
                   }`}
               >
                 จัดการสถานี ({stationsWithCoords.length})
@@ -253,12 +253,12 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
               <button
                 onClick={() => setActiveTab('without-coords')}
                 className={`flex-1 px-3 py-2 rounded-lg text-sm font-semibold transition-all ${activeTab === 'without-coords'
-                    ? theme === 'dark'
-                      ? 'bg-[#00ff41] text-black'
-                      : 'bg-blue-600 text-white'
-                    : theme === 'dark'
-                      ? 'bg-white/5 hover:bg-white/10 text-white/60'
-                      : 'bg-gray-100 hover:bg-gray-200 text-gray-600'
+                  ? theme === 'dark'
+                    ? 'bg-[#00ff41] text-black'
+                    : 'bg-blue-600 text-white'
+                  : theme === 'dark'
+                    ? 'bg-white/5 hover:bg-white/10 text-white/60'
+                    : 'bg-gray-100 hover:bg-gray-200 text-gray-600'
                   }`}
               >
                 ไม่มีพิกัด ({stationsWithoutCoords.length})
@@ -266,12 +266,12 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
               <button
                 onClick={() => setActiveTab('hidden-stations')}
                 className={`flex-1 px-3 py-2 rounded-lg text-sm font-semibold transition-all ${activeTab === 'hidden-stations'
-                    ? theme === 'dark'
-                      ? 'bg-orange-500 text-white'
-                      : 'bg-orange-600 text-white'
-                    : theme === 'dark'
-                      ? 'bg-white/5 hover:bg-white/10 text-white/60'
-                      : 'bg-gray-100 hover:bg-gray-200 text-gray-600'
+                  ? theme === 'dark'
+                    ? 'bg-orange-500 text-white'
+                    : 'bg-orange-600 text-white'
+                  : theme === 'dark'
+                    ? 'bg-white/5 hover:bg-white/10 text-white/60'
+                    : 'bg-gray-100 hover:bg-gray-200 text-gray-600'
                   }`}
               >
                 ถูกซ่อน ({hiddenStations.size})
@@ -294,8 +294,8 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="ค้นหาสถานี..."
               className={`w-full px-4 py-2 rounded-lg border mb-3 ${theme === 'dark'
-                  ? 'bg-white/5 border-white/10 text-white placeholder-white/40'
-                  : 'bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-400'
+                ? 'bg-white/5 border-white/10 text-white placeholder-white/40'
+                : 'bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-400'
                 } focus:outline-none focus:ring-2 focus:ring-[#00ff41]/50`}
             />
 
@@ -308,16 +308,16 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
                   <div
                     key={station.stationuuid}
                     className={`p-3 rounded-lg border ${isHidden
+                      ? theme === 'dark'
+                        ? 'bg-red-500/10 border-red-500/20 opacity-50'
+                        : 'bg-red-50 border-red-200 opacity-50'
+                      : isPreviewing
                         ? theme === 'dark'
-                          ? 'bg-red-500/10 border-red-500/20 opacity-50'
-                          : 'bg-red-50 border-red-200 opacity-50'
-                        : isPreviewing
-                          ? theme === 'dark'
-                            ? 'bg-[#00ff41]/10 border-[#00ff41]/30'
-                            : 'bg-blue-50 border-blue-300'
-                          : theme === 'dark'
-                            ? 'bg-white/5 border-white/10'
-                            : 'bg-gray-50 border-gray-200'
+                          ? 'bg-[#00ff41]/10 border-[#00ff41]/30'
+                          : 'bg-blue-50 border-blue-300'
+                        : theme === 'dark'
+                          ? 'bg-white/5 border-white/10'
+                          : 'bg-gray-50 border-gray-200'
                       }`}
                   >
                     <div className="flex items-start gap-3">
@@ -325,12 +325,12 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
                       <button
                         onClick={() => handlePreview(station)}
                         className={`p-2 rounded-lg transition-all flex-shrink-0 ${isPreviewing
-                            ? theme === 'dark'
-                              ? 'bg-[#00ff41] text-black'
-                              : 'bg-blue-600 text-white'
-                            : theme === 'dark'
-                              ? 'bg-white/10 hover:bg-white/20 text-white'
-                              : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
+                          ? theme === 'dark'
+                            ? 'bg-[#00ff41] text-black'
+                            : 'bg-blue-600 text-white'
+                          : theme === 'dark'
+                            ? 'bg-white/10 hover:bg-white/20 text-white'
+                            : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
                           }`}
                         title="ฟังตัวอย่าง"
                       >
@@ -365,8 +365,8 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
                       <button
                         onClick={() => toggleStationVisibility(station.stationuuid)}
                         className={`p-2 rounded-lg transition-colors flex-shrink-0 ${isHidden
-                            ? 'text-red-500 hover:bg-red-500/20'
-                            : accentColor + ' hover:' + accentBg
+                          ? 'text-red-500 hover:bg-red-500/20'
+                          : accentColor + ' hover:' + accentBg
                           }`}
                         title={isHidden ? 'แสดงสถานี' : 'ซ่อนสถานี'}
                       >
@@ -394,8 +394,8 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
               setMaxStations(1000);
             }}
             className={`px-4 py-2 rounded-lg transition-colors ${theme === 'dark'
-                ? 'bg-white/5 hover:bg-white/10 text-white/60 hover:text-white'
-                : 'bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-900'
+              ? 'bg-white/5 hover:bg-white/10 text-white/60 hover:text-white'
+              : 'bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-900'
               }`}
           >
             รีเซ็ต
@@ -403,8 +403,8 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
           <button
             onClick={handleSave}
             className={`px-6 py-2 rounded-lg font-bold transition-all ${theme === 'dark'
-                ? 'bg-[#00ff41] text-black hover:shadow-[0_0_20px_rgba(0,255,65,0.5)]'
-                : 'bg-blue-600 text-white hover:bg-blue-700'
+              ? 'bg-[#00ff41] text-black hover:shadow-[0_0_20px_rgba(0,255,65,0.5)]'
+              : 'bg-blue-600 text-white hover:bg-blue-700'
               }`}
           >
             บันทึก

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Globe2, Heart, List, Search, Settings } from 'lucide-react';
 import { Station } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
+import OnlineCounter from './OnlineCounter';
 
 interface NavigationBarProps {
   stations: Station[]; // สถานีที่มีพิกัด (สำหรับ Globe)
@@ -106,9 +107,16 @@ const NavigationBar: React.FC<NavigationBarProps> = ({
 
   return (
     <>
+      {/* Online Counter - Top Right */}
+      {!isSettingsOpen && (
+        <div className="fixed top-6 right-6 z-50">
+          <OnlineCounter />
+        </div>
+      )}
+
       {/* NavigationBar - Bottom Left (Above AudioPlayer) */}
       <div
-        className={`fixed ${navBottom} left-6 w-[280px] z-20 backdrop-blur-xl shadow-lg ${bgColor} border rounded-2xl ${isSettingsOpen ? 'hidden' : 'block'}`}
+        className={`fixed bottom-0 left-0 w-full md:bottom-6 md:left-6 md:w-[280px] z-50 backdrop-blur-xl shadow-lg ${bgColor} border-t md:border border-white/10 rounded-t-2xl md:rounded-2xl ${isSettingsOpen ? 'hidden' : 'block'}`}
       >
         <div className="flex items-center justify-around gap-1 p-2">
           {/* Explore - Opens Main Sidebar */}
@@ -173,7 +181,7 @@ const NavigationBar: React.FC<NavigationBarProps> = ({
 
       {/* Station List Panel - Compact */}
       {(activeTab === 'browse' || activeTab === 'search') && showStationList && (
-        <div className={`fixed ${panelBottom} left-6 w-[400px] max-h-[400px] z-30 backdrop-blur-xl ${bgColor} overflow-y-auto rounded-2xl border shadow-lg`}>
+        <div className={`fixed inset-x-4 bottom-[80px] top-24 md:bottom-[90px] md:left-6 md:w-[400px] md:max-h-[400px] md:top-auto z-40 backdrop-blur-xl ${bgColor} overflow-y-auto rounded-2xl border shadow-lg`}>
           <div className="p-4">
             {/* Search Input */}
             {activeTab === 'search' && (
@@ -184,8 +192,8 @@ const NavigationBar: React.FC<NavigationBarProps> = ({
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder={t('search.placeholder')}
                   className={`w-full px-3 py-2 rounded-lg border text-sm ${theme === 'dark'
-                      ? 'bg-white/5 border-white/10 text-white placeholder-white/40'
-                      : 'bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-400'
+                    ? 'bg-white/5 border-white/10 text-white placeholder-white/40'
+                    : 'bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-400'
                     } focus:outline-none focus:ring-2 focus:ring-[#00ff41]/50`}
                 />
               </div>
@@ -197,8 +205,8 @@ const NavigationBar: React.FC<NavigationBarProps> = ({
                 value={selectedCountry}
                 onChange={(e) => handleCountryChange(e.target.value)}
                 className={`w-full px-3 py-2 rounded-lg border text-sm ${theme === 'dark'
-                    ? 'bg-white/5 border-white/10 text-white'
-                    : 'bg-white border-gray-200 text-gray-900'
+                  ? 'bg-white/5 border-white/10 text-white'
+                  : 'bg-white border-gray-200 text-gray-900'
                   } focus:outline-none focus:ring-2 focus:ring-[#00ff41]/50`}
                 style={theme === 'light' ? { color: '#111827' } : undefined}
                 title={t('search.country')}
@@ -222,8 +230,8 @@ const NavigationBar: React.FC<NavigationBarProps> = ({
                 onChange={(e) => setSelectedGenre(e.target.value)}
                 style={theme === 'light' ? { color: '#111827' } : undefined}
                 className={`w-full px-3 py-2 rounded-lg border text-sm ${theme === 'dark'
-                    ? 'bg-white/5 border-white/10 text-white'
-                    : 'bg-gray-50 border-gray-200 text-gray-900'
+                  ? 'bg-white/5 border-white/10 text-white'
+                  : 'bg-gray-50 border-gray-200 text-gray-900'
                   } focus:outline-none focus:ring-2 focus:ring-[#00ff41]/50`}
                 title={t('search.genre')}
               >
@@ -248,8 +256,8 @@ const NavigationBar: React.FC<NavigationBarProps> = ({
                     onPanelChange?.(false); // ปิด Panel และแสดง AudioPlayer
                   }}
                   className={`w-full text-left p-4 rounded-xl transition-all ${theme === 'dark'
-                      ? 'bg-white/5 hover:bg-white/10 border border-white/10'
-                      : 'bg-gray-50 hover:bg-gray-100 border border-gray-200'
+                    ? 'bg-white/5 hover:bg-white/10 border border-white/10'
+                    : 'bg-gray-50 hover:bg-gray-100 border border-gray-200'
                     }`}
                 >
                   <div className="flex items-start justify-between gap-3">
@@ -280,7 +288,7 @@ const NavigationBar: React.FC<NavigationBarProps> = ({
 
       {/* Favorites List - Compact */}
       {activeTab === 'favorites' && showStationList && (
-        <div className={`fixed ${panelBottom} left-6 w-[400px] max-h-[400px] z-30 backdrop-blur-xl ${bgColor} overflow-y-auto rounded-2xl border shadow-lg`}>
+        <div className={`fixed inset-x-4 bottom-[80px] top-24 md:bottom-[90px] md:left-6 md:w-[400px] md:max-h-[400px] md:top-auto z-40 backdrop-blur-xl ${bgColor} overflow-y-auto rounded-2xl border shadow-lg`}>
           <div className="p-4">
             {favorites.length > 0 ? (
               <div className="space-y-2">
@@ -294,8 +302,8 @@ const NavigationBar: React.FC<NavigationBarProps> = ({
                       onPanelChange?.(false); // ปิด Panel และแสดง AudioPlayer
                     }}
                     className={`w-full text-left p-4 rounded-xl transition-all ${theme === 'dark'
-                        ? 'bg-white/5 hover:bg-white/10 border border-white/10'
-                        : 'bg-gray-50 hover:bg-gray-100 border border-gray-200'
+                      ? 'bg-white/5 hover:bg-white/10 border border-white/10'
+                      : 'bg-gray-50 hover:bg-gray-100 border border-gray-200'
                       }`}
                   >
                     <div className="flex items-start justify-between gap-3">
