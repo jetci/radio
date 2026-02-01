@@ -12,6 +12,7 @@ interface GlobeViewProps {
   userCountryCoords: { lat: number; lng: number } | null;
   showStartOverlay: boolean;
   theme: 'dark' | 'light';
+  onGlobeRotate?: (coords: { lat: number; lng: number }) => void; // Callback เมื่อหมุนโลก
 }
 
 const GlobeView: React.FC<GlobeViewProps> = ({
@@ -21,7 +22,8 @@ const GlobeView: React.FC<GlobeViewProps> = ({
   selectedStation,
   userCountryCoords,
   showStartOverlay,
-  theme
+  theme,
+  onGlobeRotate
 }) => {
   const globeEl = useRef<any>(null);
   const [dimensions, setDimensions] = useState({ width: window.innerWidth, height: window.innerHeight });
@@ -239,8 +241,13 @@ const GlobeView: React.FC<GlobeViewProps> = ({
     if (globeEl.current) {
       const pov = globeEl.current.pointOfView();
       setCurrentAltitude(pov.altitude || 2.5);
+      
+      // ส่งพิกัดตรงกลางกลับไปยัง App.tsx (สำหรับ Center Selection Mode)
+      if (onGlobeRotate && pov.lat !== undefined && pov.lng !== undefined) {
+        onGlobeRotate({ lat: pov.lat, lng: pov.lng });
+      }
     }
-  }, []);
+  }, [onGlobeRotate]);
 
   // Controls configuration + Zoom tracking
   useEffect(() => {

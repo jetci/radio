@@ -249,30 +249,12 @@ const App: React.FC = () => {
     setStations(filtered);
   }, [userSettings, allStations]);
 
-  // Simulate globe center updates (demo mode - in production, this would come from GlobeView)
-  useEffect(() => {
-    if (!isCenterSelectionMode) return;
-
-    // Start with user's country or default to 0,0
-    const initialLat = userCountryLat || 0;
-    const initialLng = userCountryLng || 0;
-    setGlobeCenter({ lat: initialLat, lng: initialLng });
-
-    // In production, GlobeView would call setGlobeCenter on rotation
-    // For now, we'll update it periodically to simulate rotation
-    const interval = setInterval(() => {
-      setGlobeCenter(prev => {
-        if (!prev) return { lat: initialLat, lng: initialLng };
-        // Simulate small movements
-        return {
-          lat: prev.lat + (Math.random() - 0.5) * 10,
-          lng: prev.lng + (Math.random() - 0.5) * 10
-        };
-      });
-    }, 2000);
-
-    return () => clearInterval(interval);
-  }, [isCenterSelectionMode, userCountryLat, userCountryLng]);
+  // Handle globe rotation - update center coordinates
+  const handleGlobeRotate = useCallback((coords: { lat: number; lng: number }) => {
+    if (isCenterSelectionMode) {
+      setGlobeCenter(coords);
+    }
+  }, [isCenterSelectionMode]);
 
   // Find nearest station to globe center when in Center Selection Mode
   useEffect(() => {
@@ -394,6 +376,7 @@ const App: React.FC = () => {
           userCountryCoords={userCountryLat && userCountryLng ? { lat: userCountryLat, lng: userCountryLng } : null}
           showStartOverlay={showStartOverlay}
           theme={theme}
+          onGlobeRotate={handleGlobeRotate}
         />
       )}
 
