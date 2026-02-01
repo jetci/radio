@@ -13,11 +13,13 @@ import SettingsPanel, { UserSettings } from './components/SettingsPanel';
 import ConfirmDialog from './components/ConfirmDialog';
 import { GlobeSkeleton } from './components/LoadingSkeleton';
 import OnlineCounter from './components/OnlineCounter';
-import { Signal, MapPin, Play, Globe as GlobeIcon, Sun, Moon, Sparkles } from 'lucide-react';
+import CenterSelectionMode from './components/CenterSelectionMode';
+import { Signal, MapPin, Play, Globe as GlobeIcon, Sun, Moon, Sparkles, Crosshair } from 'lucide-react';
 import { useTheme } from './contexts/ThemeContext';
 import { useListeningHistory } from './hooks/useListeningHistory';
 import { clusterStationsByCity } from './utils/cityCluster';
 import { getCountryCoordinates } from './utils/countryCoordinates';
+import { findNearestStation } from './utils/findNearestStation';
 
 const App: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
@@ -49,6 +51,9 @@ const App: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [showCityInfo, setShowCityInfo] = useState(true); // Show city info panel by default
   const [isAiJourneyLoading, setIsAiJourneyLoading] = useState(false);
+  const [isCenterSelectionMode, setIsCenterSelectionMode] = useState(false); // Center selection mode for mobile
+  const [globeCenter, setGlobeCenter] = useState<{ lat: number; lng: number } | null>(null); // Current globe center
+  const [nearestCenterStation, setNearestCenterStation] = useState<Station | null>(null); // Station at center
 
   const [favorites, setFavorites] = useState<Station[]>(() => {
     const saved = localStorage.getItem('j-radio-favorites');
@@ -243,6 +248,48 @@ const App: React.FC = () => {
     console.log(`⚙️ Applied settings: ${filtered.length} stations (from ${allStations.length})`);
     setStations(filtered);
   }, [userSettings, allStations]);
+
+  // Simulate globe center updates (demo mode - in production, this would come from GlobeView)
+  useEffect(() => {
+    if (!isCenterSelectionMode) return;
+
+    // Start with user's country or default to 0,0
+    const initialLat = userCountryLat || 0;
+    const initialLng = userCountryLng || 0;
+    setGlobeCenter({ lat: initialLat, lng: initialLng });
+
+    // In production, GlobeView would call setGlobeCenter on rotation
+    // For now, we'll update it periodically to simulate rotation
+    const interval = setInterval(() => {
+      setGlobeCenter(prev => {
+        if (!prev) return { lat: initialLat, lng: initialLng };
+        // Simulate small movements
+        return {
+          lat: prev.lat + (Math.random() - 0.5) * 10,
+          lng: prev.lng + (Math.random() - 0.5) * 10
+        };
+      });
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, [isCenterSelectionMode, userCountryLat, userCountryLng]);
+
+  // Find nearest station to globe center when in Center Selection Mode
+  useEffect(() => {
+    if (!isCenterSelectionMode || !globeCenter || stations.length === 0) {
+      setNearestCenterStation(null);
+      return;
+    }
+
+    const nearest = findNearestStation(
+      stations,
+      globeCenter.lat,
+      globeCenter.lng,
+      500 // 500km radius
+    );
+
+    setNearestCenterStation(nearest);
+  }, [isCenterSelectionMode, globeCenter, stations]);
 
   const handleSelectStation = (station: Station) => {
     setTunedStation(station);
@@ -454,10 +501,35 @@ const App: React.FC = () => {
         <button onClick={handleAiJourney}>AI Journey</button>
       </div> */}
 
-      {/* ONLINE COUNTER, THEME TOGGLE & LOCAL/GLOBAL BUTTONS (Top Right - Compact) */}
+      {/* ONLINE COUNTER, CENTER MODE, THEME TOGGLE & LOCAL/GLOBAL BUTTONS (Top Right - Compact) */}
       <div className="fixed top-4 md:top-6 right-4 md:right-6 z-50 flex items-center gap-2">
         {/* Online Counter */}
         {!settingsPanelOpen && <OnlineCounter />}
+        
+        {/* Center Selection Mode Toggle */}
+        {!settingsPanelOpen && (
+          <button
+            onClick={() => setIsCenterSelectionMode(!isCenterSelectionMode)}
+            className={`group backdrop-blur-xl border rounded-full p-2 transition-all ${
+              isCenterSelectionMode
+                ? theme === 'dark'
+                  ? 'bg-[#00ff41]/20 border-[#00ff41]/50'
+                  : 'bg-blue-100 border-blue-500/50'
+                : theme === 'dark'
+                ? 'bg-black/80 border-white/10 hover:border-[#00ff41]/50'
+                : 'bg-white/80 border-gray-200 hover:border-blue-500/50'
+            }`}
+            title={isCenterSelectionMode ? 'Click Mode' : 'Center Selection Mode (for mobile)'}
+          >
+            <Crosshair 
+              size={16} 
+              className={isCenterSelectionMode 
+                ? theme === 'dark' ? 'text-[#00ff41]' : 'text-blue-600'
+                : theme === 'dark' ? 'text-white/60' : 'text-gray-600'
+              } 
+            />
+          </button>
+        )}
         
         {/* Theme Toggle */}
         <button
@@ -507,6 +579,19 @@ const App: React.FC = () => {
           </span>
         </button>
       </div>
+
+      {/* CENTER SELECTION MODE */}
+      <CenterSelectionMode
+        isActive={isCenterSelectionMode}
+        nearestStation={nearestCenterStation}
+        onSelect={() => {
+          if (nearestCenterStation) {
+            handleSelectStation(nearestCenterStation);
+            setIsCenterSelectionMode(false); // Exit center mode after selection
+          }
+        }}
+        theme={theme}
+      />
 
       {/* WELCOME OVERLAY WITH TUTORIAL */}
       {showStartOverlay && !isLoading && (
