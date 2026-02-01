@@ -161,6 +161,24 @@ const App: React.FC = () => {
       );
 
       setLoadingStatus(`Found ${allLocalStations.length} stations in ${userCountry || 'your area'}...`);
+
+      // 🎯 Deep link detection: Handle station from URL immediately
+      const params = new URLSearchParams(window.location.search);
+      const stationId = params.get('station');
+      if (stationId) {
+        const station = processedStations.find(s => s.stationuuid === stationId);
+        if (station) {
+          console.log(`🎯 Deep link found in init: ${station.name}`);
+          isDeepLinkedRef.current = true;
+          setTunedStation(station);
+          // Pre-center the globe but don't play yet
+          setSelectedStationForGlobe(station);
+          setShowCityInfo(true);
+          // Clean up URL without reload
+          window.history.replaceState({}, '', window.location.pathname);
+        }
+      }
+
       console.log(`✅ Initialization complete!`);
 
     } catch (err) {
@@ -177,31 +195,14 @@ const App: React.FC = () => {
     initializeApp();
   }, [initializeApp]);
 
-  // Handle deep-linked station from URL
-  useEffect(() => {
-    if (allStations.length > 0) {
-      const params = new URLSearchParams(window.location.search);
-      const stationId = params.get('station');
-      if (stationId) {
-        const station = allStations.find(s => s.stationuuid === stationId);
-        if (station) {
-          console.log(`🎯 Auto-tuning to shared station: ${station.name}`);
-          isDeepLinkedRef.current = true;
-          handleSelectStation(station, true, false);
-          // Clean up URL without reload
-          window.history.replaceState({}, '', window.location.pathname);
-        }
-      }
-    }
-  }, [allStations]);
 
   const handleStart = () => {
     setShowStartOverlay(false);
 
     // If we tuned from a deep link, don't overwrite with local stations
     if (isDeepLinkedRef.current && tunedStation) {
-      console.log("🚀 Deep link detected, starting playback...");
-      // Re-trigger the selection to ensure everything is synced
+      console.log("🚀 Deep link detected, forcing playback...");
+      setIsPlaying(true);
       handleSelectStation(tunedStation, true, true);
       return;
     }
@@ -267,11 +268,17 @@ const App: React.FC = () => {
     }
 
     // Limit number of stations
-    filtered = filtered.slice(0, userSettings.maxStationsToShow);
+    let result = filtered.slice(0, userSettings.maxStationsToShow);
 
-    console.log(`⚙️ Applied settings: ${filtered.length} stations (from ${allStations.length})`);
-    setStations(filtered);
-  }, [userSettings, allStations]);
+    // CRITICAL: Always ensure the tuned station is in the visible list
+    // Otherwise, the globe will show a ring but no dot (looking broken)
+    if (tunedStation && !result.some(s => s.stationuuid === tunedStation.stationuuid)) {
+      result.push(tunedStation);
+    }
+
+    console.log(`⚙️ Applied settings: ${result.length} stations (from ${allStations.length})`);
+    setStations(result);
+  }, [userSettings, allStations, tunedStation]);
 
 
   const handleSelectStation = (station: Station, shouldCenter: boolean = true, autoPlay: boolean = true) => {

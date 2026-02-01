@@ -328,16 +328,20 @@ const GlobeView: React.FC<GlobeViewProps> = ({
   const atmosphereColor = theme === 'dark' ? '#00ff41' : '#3b82f6';
 
   const ringData = useMemo(() => {
-    if (!activeStation?.geo_lat) return [];
+    if (!activeStation?.stationuuid) return [];
+
+    // Find where the dot is actually displayed on the globe (handles spreading)
+    const marker = markerData.find(m => m.stationuuid === activeStation.stationuuid);
+
     return [{
-      lat: activeStation.geo_lat,
-      lng: activeStation.geo_long,
+      lat: marker ? marker.lat : activeStation.geo_lat,
+      lng: marker ? marker.lng : activeStation.geo_long,
       maxR: isMobile ? 8 : 12, // เล็กลงเมื่อใช้มือถือ
       propagationSpeed: isMobile ? 2 : 3, // ช้าลงหน่อยเพื่อให้ดูเนียนบนจอเล็ก
       repeatPeriod: 800,
       color: theme === 'dark' ? '#00ff41' : '#3b82f6'
     }];
-  }, [activeStation, theme, isMobile]);
+  }, [activeStation, markerData, theme, isMobile]);
 
   return (
     <div className={`w-full h-full fixed inset-0 z-0 cursor-default transition-colors duration-500`} style={{ backgroundColor: bgColor }}>
