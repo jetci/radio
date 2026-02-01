@@ -12,6 +12,7 @@ import NavigationBar from './components/NavigationBar';
 import SettingsPanel, { UserSettings } from './components/SettingsPanel';
 import ConfirmDialog from './components/ConfirmDialog';
 import { GlobeSkeleton } from './components/LoadingSkeleton';
+import OnlineCounter from './components/OnlineCounter';
 import { Signal, MapPin, Play, Globe as GlobeIcon, Sun, Moon, Sparkles } from 'lucide-react';
 import { useTheme } from './contexts/ThemeContext';
 import { useListeningHistory } from './hooks/useListeningHistory';
@@ -453,8 +454,11 @@ const App: React.FC = () => {
         <button onClick={handleAiJourney}>AI Journey</button>
       </div> */}
 
-      {/* THEME TOGGLE & LOCAL/GLOBAL BUTTONS (Top Right - Compact) */}
+      {/* ONLINE COUNTER, THEME TOGGLE & LOCAL/GLOBAL BUTTONS (Top Right - Compact) */}
       <div className="fixed top-4 md:top-6 right-4 md:right-6 z-50 flex items-center gap-2">
+        {/* Online Counter */}
+        {!settingsPanelOpen && <OnlineCounter />}
+        
         {/* Theme Toggle */}
         <button
           onClick={toggleTheme}

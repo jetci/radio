@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Globe2, Heart, List, Search, Settings } from 'lucide-react';
 import { Station } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
-import OnlineCounter from './OnlineCounter';
 
 interface NavigationBarProps {
   stations: Station[]; // สถานีที่มีพิกัด (สำหรับ Globe)
@@ -107,13 +106,6 @@ const NavigationBar: React.FC<NavigationBarProps> = ({
 
   return (
     <>
-      {/* Online Counter - Top Right */}
-      {!isSettingsOpen && (
-        <div className="fixed top-6 right-6 z-50">
-          <OnlineCounter />
-        </div>
-      )}
-
       {/* NavigationBar - Bottom Left (Above AudioPlayer) */}
       <div
         className={`fixed bottom-0 left-0 w-full md:bottom-6 md:left-6 md:w-[280px] z-50 backdrop-blur-xl shadow-lg ${bgColor} border-t md:border border-white/10 rounded-t-2xl md:rounded-2xl ${isSettingsOpen ? 'hidden' : 'block'}`}
